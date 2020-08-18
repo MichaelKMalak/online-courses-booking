@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 //const uniqueValidator = require("mongoose-unique-validator");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const { throws } = require("assert");
-const secret= require("../config").secret;
+const {throws} = require("assert");
+const secret = require("../config").secret;
 
 const UserSchema = new mongoose.Schema(
 	{
@@ -46,25 +46,28 @@ UserSchema.methods.validPassword = function(password) {
 };
 
 UserSchema.methods.generateJWT = function() {
-    const today = new Date();
-    const exp = new Date(today);
-    exp.setDate(today.getDate() + 60);
+	const today = new Date();
+	const exp = new Date(today);
+	exp.setDate(today.getDate() + 60);
 
-    return jwt.sign({
-        id: this._id,
-        username: this.username,
-        exp: parseInt(exp.getTime() / 1000),
-        }, secret);
+	return jwt.sign(
+		{
+			id: this._id,
+			username: this.username,
+			exp: parseInt(exp.getTime() / 1_000),
+		},
+		secret,
+	);
 };
 
-UserSchema.methods.toAuthJson = function(){
-    return {
-        username: this.username,
-        email: this.email,
-        bio: this.bio,
-        image: this.image,
-        token: this.generateJWT()
-    };
-}
+UserSchema.methods.toAuthJson = function() {
+	return {
+		username: this.username,
+		email: this.email,
+		bio: this.bio,
+		image: this.image,
+		token: this.generateJWT(),
+	};
+};
 
 mongoose.model("User", UserSchema);
