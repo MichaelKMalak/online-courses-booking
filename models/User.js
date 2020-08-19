@@ -64,9 +64,18 @@ UserSchema.methods.toAuthJson = function() {
 	return {
 		username: this.username,
 		email: this.email,
-		bio: this.bio,
-		image: this.image,
+		image: this.image ||
+		"https://static.productionready.io/images/smiley-cyrus.jpg",
 		token: this.generateJWT(),
+	};
+};
+
+UserSchema.methods.toProfileJson = function(user) {
+	return {
+		username: this.username,
+		bio: this.bio,
+		image: this.image ||
+		"https://static.productionready.io/images/smiley-cyrus.jpg",
 	};
 };
 
