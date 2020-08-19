@@ -17,6 +17,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 require("./models/User");
+require("./models/Lesson");
 require("./.config/passport");
 
 app.use(require("./routes"));
