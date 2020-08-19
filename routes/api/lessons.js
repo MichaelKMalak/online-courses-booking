@@ -65,7 +65,7 @@ router.put('/:lesson', auth.required, function (req, res, next) {
     }
 });
 
-router.delete('/:lesson', auth.required, function (req, res, {}}) {
+router.delete('/:lesson', auth.required, function (req, res, {}) {
     User.findById(req.payload.id).then(function () {
         if (req.lesson.teacher.toString() === req.payload.id.toString()) {
             return req.lesson.remove().then(function () {
