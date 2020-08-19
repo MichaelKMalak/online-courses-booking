@@ -4,9 +4,6 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-
 const app = express();
 
 // view engine setup
@@ -22,8 +19,7 @@ app.use(express.static(path.join(__dirname, "public")));
 require("./models/User");
 require("./.config/passport");
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use(require("./routes"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

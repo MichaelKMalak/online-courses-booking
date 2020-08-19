@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "start": "node ./app.js",
+    "dev": "nodemon ./app.js",
+    "stop": "lsof -ti :3000 | xargs kill"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
