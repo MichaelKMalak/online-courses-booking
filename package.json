@@ -13,6 +13,7 @@
     "express": "~4.16.1",
     "express-jwt": "^6.0.0",
     "http-errors": "~1.6.3",
+    "mongod": "^2.0.0",
     "mongoose": "^5.10.0",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "~1.9.1",

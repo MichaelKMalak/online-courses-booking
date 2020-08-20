@@ -7,9 +7,12 @@ const logger = require("morgan");
 const app = express();
 
 // listen on port 3000 to test
-app.listen(3000, function () {
-	console.log('Listening on port 3000!');
-});
+app.listen(
+	3_000,
+	function() {
+		console.log("Listening on port 3000!");
+	},
+);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

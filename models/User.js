@@ -25,6 +25,7 @@ const UserSchema = new mongoose.Schema(
 		},
 		bio: String,
 		image: String,
+		reservations: [{type: mongoose.Schema.Types.ObjectId, ref: "Lesson"}],
 		hash: String,
 		salt: String,
 	},
@@ -70,7 +71,25 @@ UserSchema.methods.toAuthJson = function() {
 	};
 };
 
-UserSchema.methods.toProfileJSONFor = function(user) {
+UserSchema.methods.reserve = function(id) {
+	if (this.reservations.indexOf(id) === -1) {
+		this.reservations.push(id);
+	}
+
+	return this.save();
+};
+
+UserSchema.methods.unreserve = function(id) {
+	this.reservations.remove(id);
+	return this.save();
+};
+
+UserSchema.methods.isReserved = function(id) {
+	return this.reservations.some(function(reservationId) {
+		return reservationId.toString() === id.toString();
+	});
+};
+UserSchema.methods.toProfileJSONFor = function() {
 	return {
 		username: this.username,
 		bio: this.bio,

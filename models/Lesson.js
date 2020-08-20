@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 const slug = require("slug");
+const User = mongoose.model("User");
 
 const LessonSchema = new mongoose.Schema(
 	{
@@ -30,6 +31,16 @@ LessonSchema.methods.slugify = function() {
 	this.slug = slug(this.title);
 };
 
+LessonSchema.methods.updateReservationsCount = function() {
+	const lesson = this;
+
+	return User.count({reservations: {$in: [lesson._id]}}).then(function(count) {
+		lesson.reservationCount = count;
+
+		return lesson.save();
+	});
+};
+
 LessonSchema.methods.toJSONFor = function(user) {
 	return {
 		slug: this.slug,
@@ -39,7 +50,8 @@ LessonSchema.methods.toJSONFor = function(user) {
 		createdAt: this.createdAt,
 		updatedAt: this.updatedAt,
 		tagList: this.tagList,
-		favoritesCount: this.favoritesCount,
+		reserved: user ? user.isReserved(this._id) : false,
+		reservationsCount: this.reservationsCount,
 		teacher: this.teacher.toProfileJSONFor(user),
 	};
 };
