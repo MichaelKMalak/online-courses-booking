@@ -3,6 +3,7 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 const Lesson = mongoose.model("Lesson");
 const User = mongoose.model("User");
+var Comment = mongoose.model('Comment');
 const auth = require("../auth");
 
 router.param(
@@ -19,6 +20,16 @@ router.param(
 		}).catch(next);
 	},
 );
+
+router.param('comment', function (req, res, next, id) {
+    Comment.findById(id).then(function (comment) {
+        if (!comment) { return res.sendStatus(404); }
+
+        req.comment = comment;
+
+        return next();
+    }).catch(next);
+});
 
 router.post(
 	"/",
@@ -40,6 +51,8 @@ router.post(
 		}).catch(next);
 	},
 );
+
+///LESSON CRUD
 
 router.get(
 	"/:lesson",
@@ -100,7 +113,7 @@ router.delete(
 	},
 );
 
-// Reserve a lesson
+
 router.post(
 	"/:lesson/reserve",
 	auth.required,
@@ -121,7 +134,7 @@ router.post(
 	},
 );
 
-// Unreserve a lesson
+
 router.delete(
 	"/:lesson/reserve",
 	auth.required,
@@ -141,5 +154,59 @@ router.delete(
 		}).catch(next);
 	},
 );
+
+/// COMMENT CRUD
+router.get('/:lesson/comments', auth.optional, function (req, res, next) {
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null).then(function (user) {
+        return req.lesson.populate({
+            path: 'comments',
+            populate: {
+                path: 'author'
+            },
+            options: {
+                sort: {
+                    createdAt: 'desc'
+                }
+            }
+        }).execPopulate().then(function (lesson) {
+            return res.json({
+                comments: req.lesson.comments.map(function (comment) {
+                    return comment.toJSONFor(user);
+                })
+            });
+        });
+    }).catch(next);
+});
+
+router.post('/:lesson/comments', auth.required, function (req, res, next) {
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) { return res.sendStatus(401); }
+
+        var comment = new Comment(req.body.comment);
+        comment.lesson = req.lesson;
+        comment.author = user;
+
+        return comment.save().then(function () {
+            req.lesson.comments.push(comment);
+
+            return req.lesson.save().then(function (lesson) {
+                res.json({ comment: comment.toJSONFor(user) });
+            });
+        });
+    }).catch(next);
+});
+
+router.delete('/:lesson/comments/:comment', auth.required, function (req, res, next) {
+    if (req.comment.author.toString() === req.payload.id.toString()) {
+        req.lesson.comments.remove(req.comment._id);
+        req.lesson.save()
+            .then(Comment.find({ _id: req.comment._id }).remove().exec())
+            .then(function () {
+                res.sendStatus(204);
+            });
+    } else {
+        res.sendStatus(403);
+    }
+});
 
 module.exports = router;
