@@ -58,9 +58,9 @@ router.get(
 			}
 
 			return Promise.all([
-				Lesson.find(query).limit(limit).skip(offset).sort({createdAt: "desc"}).populate(
-					"teacher",
-				).exec(),
+				Lesson.find(query).limit(Number(limit)).skip(Number(offset)).sort({
+					createdAt: "desc",
+				}).populate("teacher").exec(),
 				Lesson.count(query).exec(),
 				req.payload ? User.findById(req.payload.id) : null,
 			]).then(function(results) {
