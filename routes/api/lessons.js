@@ -20,6 +20,65 @@ router.param(
 	},
 );
 
+router.get(
+	"/",
+	auth.optional,
+	function(req, res, next) {
+		let query = {};
+		let limit = 20;
+		let offset = 0;
+
+		if (typeof req.query.limit !== "undefined") {
+			limit = req.query.limit;
+		}
+
+		if (typeof req.query.offset !== "undefined") {
+			offset = req.query.offset;
+		}
+
+		if (typeof req.query.tag !== "undefined") {
+			query.tagList = {"$in": [req.query.tag]};
+		}
+
+		Promise.all([
+			req.query.teacher ? User.findOne({username: req.query.teacher}) : null,
+			req.query.reserved ? User.findOne({username: req.query.reserved}) : null,
+		]).then(function(results) {
+			const teacher = results[0];
+			const reserver = results[1];
+
+			if (teacher) {
+				query.teacher = teacher._id;
+			}
+
+			if (reserver) {
+				query._id = {$in: reserver.reservations};
+			} else if (req.query.reserved) {
+				query._id = {$in: []};
+			}
+
+			return Promise.all([
+				Lesson.find(query).limit(limit).skip(offset).sort({createdAt: "desc"}).populate(
+					"teacher",
+				).exec(),
+				Lesson.count(query).exec(),
+				req.payload ? User.findById(req.payload.id) : null,
+			]).then(function(results) {
+				const lessons = results[0];
+				const lessonsCount = results[1];
+				const user = results[2];
+
+				return res.json({
+					lessons: lessons.map(function(lesson) {
+						return lesson.toJSONFor(user);
+					}),
+					lessonsCount,
+				});
+			});
+		}).catch(next);
+	},
+);
+
 router.post(
 	"/",
 	auth.required,
