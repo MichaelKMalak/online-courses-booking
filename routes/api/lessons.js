@@ -146,8 +146,12 @@ router.put(
 router.delete(
 	"/:lesson",
 	auth.required,
-	function(req, res, {}) {
-		User.findById(req.payload.id).then(function() {
+	function(req, res, next) {
+		User.findById(req.payload.id).then(function(user) {
+			if (!user) {
+				return res.sendStatus(401);
+			}
+
 			if (req.lesson.teacher.toString() === req.payload.id.toString()) {
 				return req.lesson.remove().then(function() {
 					return res.sendStatus(204);
@@ -155,7 +159,7 @@ router.delete(
 			} else {
 				return res.sendStatus(403);
 			}
-		});
+		}).catch(next);
 	},
 );
 
