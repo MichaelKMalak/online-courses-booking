@@ -1,4 +1,6 @@
-# online-courses-booking
+# Online Course Booking
+![Build](https://github.com/MichaelKMalak/online-courses-booking/workflows/Build/badge.svg)
+
 A simple Node (Express + Mongoose) codebase for lessons registering
 
 ## How to run
